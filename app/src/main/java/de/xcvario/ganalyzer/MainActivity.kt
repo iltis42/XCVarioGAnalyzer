@@ -355,6 +355,4 @@ class GChart(context: android.content.Context) : View(context) {
         }
         c.drawText("Nz = −Z  |  X: ${String.format(Locale.US, "%.1f", xZoom)}×  Y: ${String.format(Locale.US, "%.1f", yZoom)}×", l, t-4f, paint)
     }
-
-    override fun onDoubleTapEvent(e: MotionEvent): Boolean { resetZoom(); return true }
 }
