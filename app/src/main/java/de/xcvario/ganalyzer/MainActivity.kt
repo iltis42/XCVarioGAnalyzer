@@ -68,7 +68,8 @@ class MainActivity : Activity() {
         root.addView(import)
         root.addView(limits)
         root.addView(summary)
-        root.addView(chart, LinearLayout.LayoutParams(-1, 360))
+        val chartHeight = (resources.displayMetrics.heightPixels / resources.displayMetrics.density / 2f).toInt().coerceAtLeast(320)
+        root.addView(chart, LinearLayout.LayoutParams(-1, chartHeight))
         val zoomRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         listOf(zoomXIn, zoomXOut, zoomYIn, zoomYOut).forEach { zoomRow.addView(it, LinearLayout.LayoutParams(0, -2, 1f)) }
         root.addView(zoomRow)
@@ -293,7 +294,7 @@ class GChart(context: android.content.Context) : View(context) {
 
     override fun onDraw(c: Canvas) {
         super.onDraw(c)
-        val l = 58f; val r = width - 14f; val t = 18f; val b = height - 48f
+        val l = 76f; val r = width - 16f; val t = 24f; val b = height - 62f
         paint.color = Color.GRAY; paint.strokeWidth = 1f; paint.pathEffect = null
         c.drawLine(l, t, l, b, paint); c.drawLine(l, b, r, b, paint)
         if (data.isEmpty()) {
@@ -317,7 +318,7 @@ class GChart(context: android.content.Context) : View(context) {
             return (l + ((xv - viewStart) / max(1.0, viewEnd - viewStart) * (r-l))).toFloat()
         }
         fun yFor(v: Double) = (b - (v - low) / (high - low) * (b-t)).toFloat()
-        paint.textSize = 11f; paint.color = Color.DKGRAY
+        paint.textSize = 15f; paint.color = Color.DKGRAY
         for (i in 0..4) {
             val value = low + (high-low) * i / 4.0
             val yy = yFor(value)
@@ -337,7 +338,7 @@ class GChart(context: android.content.Context) : View(context) {
             }
         }
         c.save(); c.clipRect(l, t, r, b); c.drawPath(path, paint); c.restore()
-        paint.color = Color.DKGRAY; paint.textSize = 11f
+        paint.color = Color.DKGRAY; paint.textSize = 14f
         val mid = (viewStart + viewEnd) / 2.0
         if (hasUtc) {
             fun timeLabel(v: Double): String {
@@ -345,10 +346,10 @@ class GChart(context: android.content.Context) : View(context) {
                 val h = ms / 3600000; val m = (ms / 60000) % 60; val s = (ms / 1000) % 60
                 return String.format(Locale.US, "%02d:%02d:%02d", h, m, s)
             }
-            c.drawText(timeLabel(viewStart), l, height-22f, paint)
-            val label = timeLabel(mid); c.drawText(label, (l+r)/2f-30f, height-22f, paint)
-            val endLabel = timeLabel(viewEnd); c.drawText(endLabel, r-58f, height-22f, paint)
-            c.drawText("UTC", l, height-5f, paint)
+            c.drawText(timeLabel(viewStart), l, height-28f, paint)
+            val label = timeLabel(mid); c.drawText(label, (l+r)/2f-34f, height-28f, paint)
+            val endLabel = timeLabel(viewEnd); c.drawText(endLabel, r-70f, height-28f, paint)
+            paint.textSize = 13f; c.drawText("UTC", l, height-8f, paint)
         } else {
             c.drawText("Messpunkt ${viewStart.toInt()}", l, height-22f, paint)
             c.drawText("Messpunkt ${viewEnd.toInt()}", r-100f, height-22f, paint)
