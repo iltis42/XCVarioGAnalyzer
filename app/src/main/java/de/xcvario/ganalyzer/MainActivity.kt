@@ -75,7 +75,7 @@ class MainActivity : Activity() {
         root.addView(reset)
         root.addView(export)
         root.addView(TextView(this).apply {
-            text = "Diagramm: mit einem Finger verschieben, mit zwei Fingern zoomen. X/Y-Tasten zoomen die jeweilige Achse separat. Doppeltippen setzt den Zoom zurück."
+            text = "Diagramm: mit einem Finger verschieben, mit zwei Fingern zoomen. X/Y-Tasten zoomen die jeweilige Achse separat; „Zoom zurücksetzen“ stellt die Gesamtansicht wieder her."
             textSize = 12f; setTextColor(Color.DKGRAY); setPadding(0, 8, 0, 8)
         })
         setContentView(ScrollView(this).apply { addView(root) })
