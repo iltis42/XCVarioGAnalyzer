@@ -32,6 +32,17 @@ data class Sample(val index: Int, val x: Double, val y: Double, val z: Double, v
 data class Exceedance(val start: Int, val end: Int, val peak: Double, val positive: Boolean)
 
 class MainActivity : Activity() {
+    companion object {
+        private const val KEY_POSITIVE_LIMIT = "positive_limit"
+        private const val KEY_NEGATIVE_LIMIT = "negative_limit"
+        private const val KEY_MIN_DURATION = "minimum_duration"
+        private const val KEY_SAMPLE_INDEX = "sample_index"
+        private const val KEY_SAMPLE_X = "sample_x"
+        private const val KEY_SAMPLE_Y = "sample_y"
+        private const val KEY_SAMPLE_Z = "sample_z"
+        private const val KEY_SAMPLE_UTC = "sample_utc"
+    }
+
     private val samples = mutableListOf<Sample>()
     private var positiveLimit = 5.3
     private var negativeLimit = -3.0
@@ -80,6 +91,43 @@ class MainActivity : Activity() {
             textSize = 12f; setTextColor(Color.DKGRAY); setPadding(0, 8, 0, 8)
         })
         setContentView(ScrollView(this).apply { addView(root) })
+
+        // Restore the analysis after Android recreates the Activity on screen rotation.
+        if (savedInstanceState != null) {
+            positiveLimit = savedInstanceState.getDouble(KEY_POSITIVE_LIMIT, 5.3)
+            negativeLimit = savedInstanceState.getDouble(KEY_NEGATIVE_LIMIT, -3.0)
+            minDuration = savedInstanceState.getDouble(KEY_MIN_DURATION, 0.4)
+            val indices = savedInstanceState.getIntArray(KEY_SAMPLE_INDEX)
+            val xs = savedInstanceState.getDoubleArray(KEY_SAMPLE_X)
+            val ys = savedInstanceState.getDoubleArray(KEY_SAMPLE_Y)
+            val zs = savedInstanceState.getDoubleArray(KEY_SAMPLE_Z)
+            val times = savedInstanceState.getLongArray(KEY_SAMPLE_UTC)
+            if (indices != null && xs != null && ys != null && zs != null &&
+                times != null && indices.size == xs.size && xs.size == ys.size &&
+                ys.size == zs.size && zs.size == times.size) {
+                samples.clear()
+                for (i in indices.indices) {
+                    val utc = times[i].takeIf { it != Long.MIN_VALUE }
+                    samples.add(Sample(indices[i], xs[i], ys[i], zs[i], utc))
+                }
+                if (samples.isNotEmpty()) {
+                    status.text = "Analyse nach Bildschirmdrehung wiederhergestellt: ${samples.size} PXCV-Messpunkte"
+                    refreshAnalysis()
+                }
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putDouble(KEY_POSITIVE_LIMIT, positiveLimit)
+        outState.putDouble(KEY_NEGATIVE_LIMIT, negativeLimit)
+        outState.putDouble(KEY_MIN_DURATION, minDuration)
+        outState.putIntArray(KEY_SAMPLE_INDEX, samples.map { it.index }.toIntArray())
+        outState.putDoubleArray(KEY_SAMPLE_X, samples.map { it.x }.toDoubleArray())
+        outState.putDoubleArray(KEY_SAMPLE_Y, samples.map { it.y }.toDoubleArray())
+        outState.putDoubleArray(KEY_SAMPLE_Z, samples.map { it.z }.toDoubleArray())
+        outState.putLongArray(KEY_SAMPLE_UTC, samples.map { it.utcMs ?: Long.MIN_VALUE }.toLongArray())
     }
 
     private fun openFile() {
